@@ -1,0 +1,289 @@
+{% extends "layouts/base.html" %}
+{% block title %}BuildCompare — Compare Materials. Plan Better. Build Smarter.{% endblock %}
+
+{% block content %}
+<!-- 1. Hero Section -->
+<section
+  class="bc-hero d-flex align-items-center text-white"
+  style="--bc-hero-img: url('{{ url_for('static', filename='images/hero-bg.png') }}');"
+>
+  <div class="container py-5">
+    <div class="row">
+      <div class="col-lg-7">
+        <p class="bc-eyebrow mb-2">YOUR CONSTRUCTIONS MARKETPLACE</p>
+        <h1 class="display-4 fw-bold lh-sm mb-3">
+          Compare Materials.<br>
+          Plan Better.<br>
+          <span class="bc-text-orange">Build Smarter.</span>
+        </h1>
+        <p class="text-light opacity-75 mb-4">
+          Find and compare construction materials from local hardware stores in San Fernando, Pampanga.<br>
+          Save time, save money, build with confidence.
+        </p>
+
+        <div class="bg-white rounded-3 p-3 shadow-lg text-dark mb-3 bc-hero-search">
+          <div class="input-group border-bottom pb-2 mb-2">
+            <span class="input-group-text bg-transparent border-0 ps-1"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" class="form-control border-0 shadow-none" placeholder="Search materials (e.g. cement, steel bars, plywood...)">
+          </div>
+          <div class="row g-2 align-items-center">
+            <div class="col-sm-7">
+              <select class="form-select form-select-sm border-light-subtle">
+                <option selected>All Categories</option>
+                {% for cat in categories %}
+                  <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-sm-5">
+              <button type="button" class="btn bc-btn-orange btn-sm w-100 fw-semibold py-2">Search Materials</button>
+            </div>
+          </div>
+        </div>
+
+        <small class="text-light opacity-75">
+          <i class="bi bi-geo-alt-fill bc-text-orange me-1"></i> Serving San Fernando, Pampanga
+        </small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Browse Categories -->
+<section id="browse-categories" class="py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold mb-0">Browse Categories</h4>
+      <a href="#browse-categories" class="small text-decoration-none fw-semibold bc-link-indigo">
+        View All Categories <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    {% if categories %}
+      <div class="row row-cols-2 row-cols-sm-4 row-cols-lg-7 g-3">
+        {% for cat in categories %}
+        <div class="col">
+          <div class="card h-100 text-center border-light-subtle shadow-sm bc-hover-card p-3">
+            <div class="bc-cat-icon mx-auto mb-3">
+              <i class="bi {{ cat.icon | default('bi-grid') }} fs-4"></i>
+            </div>
+            <h6 class="fw-bold small mb-1">{{ cat.name }}</h6>
+            <span class="text-muted bc-xs">{{ cat.count_label | default('') }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="bc-empty-box rounded-3 p-5 text-center">
+        <i class="bi bi-grid-3x3-gap fs-2 text-secondary opacity-50 d-block mb-2"></i>
+        <p class="fw-semibold text-secondary mb-1">No categories available yet</p>
+        <small class="text-muted">Categories will appear here once added to the system.</small>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- 3. Popular Construction Materials -->
+<section id="popular-materials" class="py-4">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold mb-0">Popular Construction Materials</h4>
+      <a href="#popular-materials" class="small text-decoration-none fw-semibold bc-link-indigo">
+        View All Materials <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    {% if popular_materials %}
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3">
+        {% for item in popular_materials %}
+        <div class="col">
+          <div class="card h-100 border-light-subtle shadow-sm bc-hover-card p-3">
+            <div class="bc-img-placeholder rounded-2 mb-3 d-flex flex-column align-items-center justify-content-center">
+              {% if item.image_url %}
+                <img src="{{ item.image_url }}" alt="{{ item.name }}" class="img-fluid rounded-2">
+              {% else %}
+                <i class="bi bi-image fs-2 text-secondary opacity-50"></i>
+                <span class="bc-xs text-secondary opacity-75 mt-1">No Image</span>
+              {% endif %}
+            </div>
+
+            <span class="badge bc-badge-soft align-self-start mb-2">{{ item.category_name }}</span>
+            <h6 class="fw-bold mb-0">{{ item.name }}</h6>
+            <small class="text-muted mb-3">{{ item.spec_label }}</small>
+
+            <div class="mt-auto">
+              <div class="fw-bold fs-6">{{ item.price_label }}</div>
+              <small class="text-muted d-block mb-3">{{ item.stores_label }}</small>
+              <button type="button" class="btn bc-btn-orange btn-sm w-100 fw-semibold">Compare Prices</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="bc-empty-box rounded-3 p-5 text-center">
+        <i class="bi bi-box-seam fs-2 text-secondary opacity-50 d-block mb-2"></i>
+        <p class="fw-semibold text-secondary mb-1">No construction materials listed yet</p>
+        <small class="text-muted">Materials will appear here once hardware stores or admins insert products.</small>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- 4. How BuildCompare Works -->
+<section class="bc-lavender-section py-5 my-5">
+  <div class="container">
+    <h5 class="fw-bold mb-5">How BuildCompare Works</h5>
+    <div class="row g-4 text-center">
+      <div class="col-6 col-lg-3">
+        <div class="bc-step-box mx-auto mb-3"><i class="bi bi-search fs-3"></i></div>
+        <h6 class="fw-bold small">Search Materials</h6>
+        <p class="text-muted bc-xs px-2">Find the construction materials you need from local hardware stores.</p>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="bc-step-box mx-auto mb-3"><i class="bi bi-sliders fs-3"></i></div>
+        <h6 class="fw-bold small">Compare Prices</h6>
+        <p class="text-muted bc-xs px-2">Compare prices, specifications, and availability from different hardware stores.</p>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="bc-step-box mx-auto mb-3"><i class="bi bi-diagram-3 fs-3"></i></div>
+        <h6 class="fw-bold small">Request Quotations</h6>
+        <p class="text-muted bc-xs px-2">Add items to your list and request quotations from multiple stores.</p>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="bc-step-box mx-auto mb-3"><i class="bi bi-cart3 fs-3"></i></div>
+        <h6 class="fw-bold small">Place Your Orders</h6>
+        <p class="text-muted bc-xs px-2">Choose your preferred store and coordinate your delivery or pick up.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Why Choose BuildCompare? -->
+<section id="why-choose" class="py-4">
+  <div class="container">
+    <h5 class="fw-bold mb-4">Why Choose BuildCompare?</h5>
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 text-center">
+      {% set features = [
+        ("bi-tag", "Material Comparison", "Compare prices and specifications across different stores."),
+        ("bi-list-check", "Canvass List", "Create and organize your construction materials list."),
+        ("bi-cloud-arrow-up", "List Import", "Import your material list from Excel or PDF files easily."),
+        ("bi-robot", "AI Hardware Assistant", "Get help identifying materials and discover possible alternatives."),
+        ("bi-diagram-3", "Quotation Requests", "Send requests to multiple stores and get the best deals."),
+        ("bi-truck", "Order Coordination", "Track your orders and coordinate delivery seamlessly.")
+      ] %}
+      {% for icon, title, desc in features %}
+      <div class="col">
+        <div class="card h-100 border-light-subtle shadow-sm p-3">
+          <div class="bc-step-box mx-auto mb-3"><i class="bi {{ icon }} fs-4"></i></div>
+          <h6 class="fw-bold small">{{ title }}</h6>
+          <p class="text-muted bc-xs mb-0">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- 6. Featured Hardware Stores -->
+<section id="featured-stores" class="py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold mb-0">Featured Hardware Stores</h4>
+      <a href="#featured-stores" class="small text-decoration-none fw-semibold bc-link-indigo">
+        Explore All Stores <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    {% if featured_stores %}
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
+        {% for store in featured_stores %}
+        <div class="col">
+          <div class="card h-100 border-light-subtle shadow-sm bc-hover-card overflow-hidden">
+            <div class="bc-store-placeholder d-flex flex-column align-items-center justify-content-center">
+              {% if store.banner_url %}
+                <img src="{{ store.banner_url }}" alt="{{ store.name }}" class="w-100 h-100 object-fit-cover">
+              {% else %}
+                <i class="bi bi-shop fs-2 text-secondary opacity-50"></i>
+                <span class="bc-xs text-secondary opacity-75 mt-1">No Banner</span>
+              {% endif %}
+            </div>
+            <div class="card-body p-3">
+              <div class="d-flex justify-content-between align-items-start mb-1">
+                <h6 class="fw-bold mb-0">{{ store.name }}</h6>
+                {% if store.is_verified %}
+                  <span class="badge bc-badge-soft">Verified</span>
+                {% endif %}
+              </div>
+              <small class="text-muted d-block mb-2">
+                <i class="bi bi-geo-alt me-1"></i>{{ store.location }}
+              </small>
+              <button type="button" class="btn bc-btn-lavender btn-sm w-100 fw-semibold">View Store</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="bc-empty-box rounded-3 p-5 text-center">
+        <i class="bi bi-shop fs-2 text-secondary opacity-50 d-block mb-2"></i>
+        <p class="fw-semibold text-secondary mb-1">No hardware stores listed yet</p>
+        <small class="text-muted">Verified stores will appear here once registered and approved.</small>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- 7. Smart Assistant Banner -->
+<section class="py-3">
+  <div class="container">
+    <div class="bc-dark-banner rounded-4 p-4 p-lg-5 text-white shadow">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-6 d-flex align-items-center gap-4">
+          <div class="bc-bot-avatar flex-shrink-0 d-none d-sm-flex align-items-center justify-content-center">
+            <i class="bi bi-robot display-4 text-white"></i>
+          </div>
+          <div>
+            <span class="bc-eyebrow d-block mb-1">SMART ASSISTANT</span>
+            <h3 class="fw-bold mb-2">Not Sure What Material You Need?</h3>
+            <p class="small text-light opacity-75 mb-0">
+              Let the BuildCompare AI Hardware Assistant help you identify construction materials and discover possible alternatives.
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="bg-white text-dark rounded-4 p-4">
+            <span class="bc-eyebrow d-block mb-1">AI HARDWARE ASSISTANT</span>
+            <h5 class="fw-bold mb-3">What construction material are looking for?</h5>
+            <div class="input-group">
+              <input type="text" class="form-control bg-light border-0" placeholder="Ask about cement, steel bars, roofing...">
+              <button class="btn bc-btn-orange px-3" type="button"><i class="bi bi-send-fill"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. Ready to Build Smarter CTA -->
+<section class="py-4">
+  <div class="container">
+    <div class="bc-orange-banner rounded-4 p-4 p-lg-5 text-white shadow-sm">
+      <div class="row align-items-center g-3">
+        <div class="col-lg-8">
+          <h3 class="fw-bold mb-2">Ready to Build Smarter?</h3>
+          <p class="mb-0 opacity-90">
+            Join thousands of builders, contractors, and homeowners who compare, plan, and build better with BuildCompare.
+          </p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+          <a href="{{ url_for('auth.login') }}" class="btn bc-btn-dark btn-lg px-4 py-3 fw-semibold rounded-3">
+            Get Started Today <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

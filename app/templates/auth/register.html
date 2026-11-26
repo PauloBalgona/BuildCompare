@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create Account — BuildCompare</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+  <div class="container-fluid bc-auth-wrapper">
+    <div class="row min-vh-100">
+      <!-- Left Navy Panel -->
+      <div class="col-lg-5 bc-auth-sidebar d-flex flex-column justify-content-between p-4 p-lg-5 text-white">
+        <div>
+          <a href="{{ url_for('main.landing') }}" class="text-white text-decoration-none d-inline-block mb-5">
+            <div class="fw-bold fs-5 tracking-wide">BUILDCOMPARE</div>
+            <small class="text-uppercase bc-auth-sub">BuildCompare Portal</small>
+          </a>
+
+          <h1 class="display-6 fw-bold mb-3">
+            A little about you.<br>
+            A lot to build<br>
+            forward to.
+          </h1>
+          <p class="bc-auth-copy mb-0">
+            Create your account to canvass smarter, compare local hardware stores and keep your next project moving.
+          </p>
+        </div>
+
+        <div class="bc-auth-footer-note pt-4 mt-5">
+          <div class="small mb-2">Your details, securely in your hands.</div>
+          <small class="text-secondary">&copy; 2026 BuildCompare</small>
+        </div>
+      </div>
+
+      <!-- Right Form Panel -->
+      <div class="col-lg-7 bg-white d-flex align-items-center justify-content-center p-4 p-lg-5">
+        <div class="bc-auth-form-box w-100">
+          <small class="text-uppercase fw-semibold bc-auth-eyebrow d-block mb-1">Get started</small>
+          <h2 class="fw-bold mb-1">Create your account</h2>
+          <p class="text-muted small mb-4">Enter your details below. Required fields depend on your account type.</p>
+
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }} small py-2">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+
+          <form method="POST" enctype="multipart/form-data" novalidate>
+            <!-- Account Type Toggle (Customer vs Owner) -->
+            <div class="mb-3">
+              <label class="form-label small fw-semibold d-block">Account Type</label>
+              <div class="btn-group w-100" role="group">
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="role"
+                  id="roleCustomer"
+                  value="customer"
+                  {% if selected_role != 'owner' %}checked{% endif %}
+                >
+                <label class="btn btn-outline-secondary btn-sm py-2" for="roleCustomer">Customer</label>
+
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="role"
+                  id="roleOwner"
+                  value="owner"
+                  {% if selected_role == 'owner' %}checked{% endif %}
+                >
+                <label class="btn btn-outline-secondary btn-sm py-2" for="roleOwner">Hardware Owner</label>
+              </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-sm-6">
+                <label for="firstName" class="form-label small fw-semibold">First name</label>
+                <input type="text" id="firstName" name="first_name" class="form-control" placeholder="First name" required>
+              </div>
+              <div class="col-sm-6">
+                <label for="lastName" class="form-label small fw-semibold">Last name</label>
+                <input type="text" id="lastName" name="last_name" class="form-control" placeholder="Last name" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="regEmail" class="form-label small fw-semibold">Email address</label>
+              <input type="email" id="regEmail" name="email" class="form-control" placeholder="Enter your email address" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="phone" class="form-label small fw-semibold">Mobile number</label>
+              <input type="text" id="phone" name="phone" class="form-control" placeholder="Enter your mobile number">
+            </div>
+
+            <!-- Extra Fields for Hardware Owner Only -->
+            <div id="ownerFields" class="bc-owner-box rounded-3 p-3 mb-3 {% if selected_role != 'owner' %}d-none{% endif %}">
+              <div class="small fw-bold mb-2">Hardware Store Verification Requirements</div>
+              <div class="mb-2">
+                <label for="storeName" class="form-label small fw-semibold">Hardware Store Name</label>
+                <input type="text" id="storeName" name="store_name" class="form-control form-control-sm" placeholder="e.g. San Fernando Builders Supply">
+              </div>
+              <div class="mb-2">
+                <label for="storeLocation" class="form-label small fw-semibold">Store Address / Location</label>
+                <input type="text" id="storeLocation" name="store_location" class="form-control form-control-sm" placeholder="Barangay, City/Municipality, Pampanga">
+              </div>
+              <div>
+                <label for="businessPermit" class="form-label small fw-semibold">Business Permit (PDF, PNG, JPG, WEBP)</label>
+                <input type="file" id="businessPermit" name="business_permit" class="form-control form-control-sm" accept=".pdf,.png,.jpg,.jpeg,.webp">
+                <div class="form-text bc-xs">Max 5 MB. Requires admin verification before store access is approved.</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="regPassword" class="form-label small fw-semibold">Password</label>
+              <div class="input-group">
+                <input type="password" id="regPassword" name="password" class="form-control" placeholder="Create a password" required>
+                <button class="btn btn-outline-secondary btn-sm px-3 bc-toggle-pw" type="button" data-target="regPassword">Show</button>
+              </div>
+              <div class="form-text bc-xs">Use at least 8 characters.</div>
+            </div>
+
+            <div class="mb-4">
+              <label for="confirmPassword" class="form-label small fw-semibold">Confirm password</label>
+              <div class="input-group">
+                <input type="password" id="confirmPassword" name="confirm_password" class="form-control" placeholder="Re-enter your password" required>
+                <button class="btn btn-outline-secondary btn-sm px-3 bc-toggle-pw" type="button" data-target="confirmPassword">Show</button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn bc-btn-primary w-100 py-2 fw-semibold">Create account</button>
+          </form>
+
+          <p class="text-center small text-muted mt-4 mb-0">
+            Already have an account? <a href="{{ url_for('auth.login') }}" class="text-decoration-none fw-semibold bc-auth-link">Sign in</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>

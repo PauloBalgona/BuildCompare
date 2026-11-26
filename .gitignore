@@ -1,0 +1,23 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Byte-compiled / cache / pytest
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Secrets & local database / instance files
+.env
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# OS & editor files
+.DS_Store
+Thumbs.db
