@@ -17,7 +17,7 @@
         <img
           src="{{ url_for('static', filename='images/bc-logo.png') }}"
           alt="BuildCompare Logo"
-          height="36"
+          height="37"
           class="rounded-2"
           onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';"
         >
@@ -33,13 +33,13 @@
       </button>
 
       <div class="collapse navbar-collapse" id="mainNav">
-        <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-3">
-          <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.landing') }}">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="#why-choose">About Us</a></li>
-          <li class="nav-item"><a class="nav-link" href="#browse-categories">Categories</a></li>
-          <li class="nav-item"><a class="nav-link" href="#popular-materials">Materials</a></li>
-          <li class="nav-item"><a class="nav-link" href="#featured-stores">Stores</a></li>
-        </ul>
+       <ul class="navbar-nav mx-auto mb-5 mb-lg-0 gap-lg-2">
+            <li class="nav-item"><a class="nav-link active text-white" href="{{ url_for('main.landing') }}">Home</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#why-choose">About Us</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#browse-categories">Categories</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#popular-materials">Materials</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#featured-stores">Stores</a></li>
+     </ul>
 
         <form class="d-flex me-lg-3 my-2 my-lg-0" role="search">
           <div class="input-group input-group-sm bc-nav-search">
@@ -81,7 +81,14 @@
       <div class="row g-4">
         <div class="col-lg-4">
           <div class="d-flex align-items-center gap-2 mb-3">
-            <span class="bc-logo-badge">BC</span>
+            <img
+              src="{{ url_for('static', filename='images/bc-logo.png') }}"
+              alt="BuildCompare Logo"
+              height="37"
+              class="rounded-2"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';"
+            >
+            <span class="bc-logo-badge" style="display: none;">BC</span>
             <div class="lh-1">
               <span class="d-block fw-bold fs-5">BUILDCOMPARE</span>
               <small class="bc-brand-sub">COMPARE. PLAN. BUILD SMARTER.</small>
