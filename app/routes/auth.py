@@ -1,8 +1,12 @@
+import json
 import os
 import smtplib
 import socket
+import urllib.error
+import urllib.request
 import uuid
 from email.message import EmailMessage
+from email.utils import parseaddr
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
@@ -82,7 +86,6 @@ def _verify_reset_token(token: str, max_age: int = 1800) -> str | None:
 
 
 def _resolve_smtp_ipv4(host: str, port: int) -> str:
-    """Pinipilit gumamit ng IPv4 para hindi mag-Errno 101 sa IPv6 sa Render."""
     try:
         addr_info = socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM)
         if addr_info:
@@ -93,28 +96,17 @@ def _resolve_smtp_ipv4(host: str, port: int) -> str:
 
 
 def _send_reset_email(recipient_email: str, reset_link: str) -> bool:
-    smtp_server = os.environ.get("MAIL_SERVER", "smtp.gmail.com").strip()
-    smtp_port = int(os.environ.get("MAIL_PORT", "587"))
-    use_tls = os.environ.get("MAIL_USE_TLS", "true").lower() in ("1", "true", "yes", "on")
-    use_ssl = os.environ.get("MAIL_USE_SSL", "false").lower() in ("1", "true", "yes", "on")
-    username = os.environ.get("MAIL_USERNAME", "").strip()
-    password = os.environ.get("MAIL_PASSWORD", "").strip()
-    sender = os.environ.get("MAIL_DEFAULT_SENDER", username).strip()
+    brevo_api_key = os.environ.get("BREVO_API_KEY", "").strip()
+    raw_sender = (
+        os.environ.get("MAIL_DEFAULT_SENDER")
+        or os.environ.get("MAIL_USERNAME")
+        or ""
+    ).strip()
+    sender_name, sender_email = parseaddr(raw_sender)
+    sender_name = sender_name or "BuildCompare"
+    sender_email = sender_email or raw_sender
 
-    if not username or not password:
-        current_app.logger.warning(
-            "SMTP credentials are not configured. Reset link for %s: %s",
-            recipient_email,
-            reset_link,
-        )
-        return False
-
-    msg = EmailMessage()
-    msg["Subject"] = "Reset Your BuildCompare Password"
-    msg["From"] = sender or username
-    msg["To"] = recipient_email
-
-    msg.set_content(
+    text_body = (
         f"Hi,\n\n"
         f"We received a request to reset your BuildCompare password.\n"
         f"Click the link below to set a new password (valid for 30 minutes):\n"
@@ -123,30 +115,100 @@ def _send_reset_email(recipient_email: str, reset_link: str) -> bool:
         f"— BuildCompare"
     )
 
-    msg.add_alternative(
-        f"""
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827; max-width: 520px;">
-          <h2 style="margin-bottom: 8px;">Reset your BuildCompare password</h2>
-          <p style="color: #4b5563; margin-top: 0;">
-            We received a request to reset the password for your account. Click the button below to choose a new password:
-          </p>
-          <p style="margin: 24px 0;">
-            <a href="{reset_link}"
-               style="display: inline-block; padding: 12px 20px; background-color: #111827; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600;">
-              Reset Password
-            </a>
-          </p>
-          <p style="font-size: 13px; color: #6b7280;">
-            This link will expire in 30 minutes. If you didn't request a password reset, you can ignore this message.
-          </p>
-          <p style="font-size: 12px; color: #9ca3af; word-break: break-all;">
-            Or copy and paste this URL into your browser:<br>
-            {reset_link}
-          </p>
-        </div>
-        """,
-        subtype="html",
-    )
+    html_body = f"""
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827; max-width: 520px;">
+      <h2 style="margin-bottom: 8px;">Reset your BuildCompare password</h2>
+      <p style="color: #4b5563; margin-top: 0;">
+        We received a request to reset the password for your account. Click the button below to choose a new password:
+      </p>
+      <p style="margin: 24px 0;">
+        <a href="{reset_link}"
+           style="display: inline-block; padding: 12px 20px; background-color: #111827; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+          Reset Password
+        </a>
+      </p>
+      <p style="font-size: 13px; color: #6b7280;">
+        This link will expire in 30 minutes. If you didn't request a password reset, you can ignore this message.
+      </p>
+      <p style="font-size: 12px; color: #9ca3af; word-break: break-all;">
+        Or copy and paste this URL into your browser:<br>
+        {reset_link}
+      </p>
+    </div>
+    """
+
+    # 1. Gamitin ang Brevo HTTPS API (Port 443 - hindi naka-block sa Render)
+    if brevo_api_key and sender_email:
+        payload = json.dumps(
+            {
+                "sender": {"name": sender_name, "email": sender_email},
+                "to": [{"email": recipient_email}],
+                "subject": "Reset Your BuildCompare Password",
+                "htmlContent": html_body,
+                "textContent": text_body,
+            }
+        ).encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://api.brevo.com/v3/smtp/email",
+            data=payload,
+            headers={
+                "accept": "application/json",
+                "api-key": brevo_api_key,
+                "content-type": "application/json",
+            },
+            method="POST",
+        )
+
+        try:
+            with urllib.request.urlopen(req, timeout=15) as response:
+                if 200 <= response.status < 300:
+                    return True
+                current_app.logger.error(
+                    "Brevo API returned unexpected status %s for %s",
+                    response.status,
+                    recipient_email,
+                )
+                return False
+        except urllib.error.HTTPError as exc:
+            error_detail = exc.read().decode("utf-8", errors="ignore")
+            current_app.logger.error(
+                "Brevo API HTTP error (%s) sending to %s: %s",
+                exc.code,
+                recipient_email,
+                error_detail,
+            )
+            return False
+        except Exception as exc:
+            current_app.logger.error(
+                "Failed to send reset email via Brevo API to %s: %s",
+                recipient_email,
+                exc,
+            )
+            return False
+
+    # 2. Fallback sa SMTP para sa local development
+    smtp_server = os.environ.get("MAIL_SERVER", "smtp.gmail.com").strip()
+    smtp_port = int(os.environ.get("MAIL_PORT", "587"))
+    use_tls = os.environ.get("MAIL_USE_TLS", "true").lower() in ("1", "true", "yes", "on")
+    use_ssl = os.environ.get("MAIL_USE_SSL", "false").lower() in ("1", "true", "yes", "on")
+    username = os.environ.get("MAIL_USERNAME", "").strip()
+    password = os.environ.get("MAIL_PASSWORD", "").strip()
+
+    if not username or not password:
+        current_app.logger.warning(
+            "Email credentials are not configured. Reset link for %s: %s",
+            recipient_email,
+            reset_link,
+        )
+        return False
+
+    msg = EmailMessage()
+    msg["Subject"] = "Reset Your BuildCompare Password"
+    msg["From"] = raw_sender or username
+    msg["To"] = recipient_email
+    msg.set_content(text_body)
+    msg.add_alternative(html_body, subtype="html")
 
     connect_host = _resolve_smtp_ipv4(smtp_server, smtp_port)
 
