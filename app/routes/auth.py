@@ -96,6 +96,7 @@ def _send_reset_email(recipient_email: str, reset_link: str) -> bool:
     smtp_server = os.environ.get("MAIL_SERVER", "smtp.gmail.com").strip()
     smtp_port = int(os.environ.get("MAIL_PORT", "587"))
     use_tls = os.environ.get("MAIL_USE_TLS", "true").lower() in ("1", "true", "yes", "on")
+    use_ssl = os.environ.get("MAIL_USE_SSL", "false").lower() in ("1", "true", "yes", "on")
     username = os.environ.get("MAIL_USERNAME", "").strip()
     password = os.environ.get("MAIL_PASSWORD", "").strip()
     sender = os.environ.get("MAIL_DEFAULT_SENDER", username).strip()
@@ -150,13 +151,19 @@ def _send_reset_email(recipient_email: str, reset_link: str) -> bool:
     connect_host = _resolve_smtp_ipv4(smtp_server, smtp_port)
 
     try:
-        with smtplib.SMTP(connect_host, smtp_port, timeout=15) as server:
-            server.ehlo()
-            if use_tls:
-                server.starttls()
+        if smtp_port == 465 or use_ssl:
+            with smtplib.SMTP_SSL(connect_host, smtp_port, timeout=20) as server:
                 server.ehlo()
-            server.login(username, password)
-            server.send_message(msg)
+                server.login(username, password)
+                server.send_message(msg)
+        else:
+            with smtplib.SMTP(connect_host, smtp_port, timeout=20) as server:
+                server.ehlo()
+                if use_tls:
+                    server.starttls()
+                    server.ehlo()
+                server.login(username, password)
+                server.send_message(msg)
         return True
     except Exception as exc:
         current_app.logger.error("Failed to send reset email to %s: %s", recipient_email, exc)
