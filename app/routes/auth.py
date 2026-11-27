@@ -1,5 +1,6 @@
 import os
 import smtplib
+import socket
 import uuid
 from email.message import EmailMessage
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
@@ -80,10 +81,21 @@ def _verify_reset_token(token: str, max_age: int = 1800) -> str | None:
         return None
 
 
+def _resolve_smtp_ipv4(host: str, port: int) -> str:
+    """Pinipilit gumamit ng IPv4 para hindi mag-Errno 101 sa IPv6 sa Render."""
+    try:
+        addr_info = socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM)
+        if addr_info:
+            return addr_info[0][4][0]
+    except socket.gaierror:
+        pass
+    return host
+
+
 def _send_reset_email(recipient_email: str, reset_link: str) -> bool:
-    smtp_server = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
+    smtp_server = os.environ.get("MAIL_SERVER", "smtp.gmail.com").strip()
     smtp_port = int(os.environ.get("MAIL_PORT", "587"))
-    use_tls = os.environ.get("MAIL_USE_TLS", "true").lower() == "true"
+    use_tls = os.environ.get("MAIL_USE_TLS", "true").lower() in ("1", "true", "yes", "on")
     username = os.environ.get("MAIL_USERNAME", "").strip()
     password = os.environ.get("MAIL_PASSWORD", "").strip()
     sender = os.environ.get("MAIL_DEFAULT_SENDER", username).strip()
@@ -135,10 +147,14 @@ def _send_reset_email(recipient_email: str, reset_link: str) -> bool:
         subtype="html",
     )
 
+    connect_host = _resolve_smtp_ipv4(smtp_server, smtp_port)
+
     try:
-        with smtplib.SMTP(smtp_server, smtp_port, timeout=15) as server:
+        with smtplib.SMTP(connect_host, smtp_port, timeout=15) as server:
+            server.ehlo()
             if use_tls:
                 server.starttls()
+                server.ehlo()
             server.login(username, password)
             server.send_message(msg)
         return True
