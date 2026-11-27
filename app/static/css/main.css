@@ -7,27 +7,57 @@
   --bc-indigo: #4f46e5;
 }
 
+.bc-navbar .nav-link {
+  position: relative;
+  padding-bottom: 6px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: color 0.2s ease;
+}
+
+.bc-navbar .nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2.5px;
+  background-color: var(--bc-orange);
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+/* Hover effect */
+.bc-navbar .nav-link:hover {
+  color: #ffffff;
+}
+
+.bc-navbar .nav-link:hover::after {
+  width: 100%;
+}
+
+/* Active (naka-stay put ang orange underline sa pinindot na link) */
+.bc-navbar .nav-link.active {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.bc-navbar .nav-link.active::after {
+  width: 100%;
+}
+
 .bc-navbar,
 .bc-footer {
   background-color: var(--bc-navy);
 }
 
-.bc-logo-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 40px;
-  border-radius: 8px;
-  background: var(--bc-orange);
-  color: var(--bc-navy);
-  font-weight: 800;
-}
 
 .bc-brand-sub {
-  font-size: 0.4rem;
+  display: block;
+  font-size: 0.40rem; 
   letter-spacing: 0.08em;
-  color:#dc7816;
+  line-height: 1.1;
+  margin-top: 2px;
+  color: #dc7816;
 }
 
 .bc-nav-search {

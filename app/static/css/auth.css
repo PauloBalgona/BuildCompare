@@ -52,3 +52,132 @@
 .bc-xs {
   font-size: 0.75rem;
 }
+
+.bc-auth-form-box .form-control:focus {
+  box-shadow: none;
+  border-color: #6c757d;
+}
+
+.bc-auth-form-box .input-group:focus-within {
+  border-color: #6c757d !important;
+}
+
+
+/* reset password page*/
+.bc-auth-panel-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: #e5e7eb;
+}
+
+.bc-auth-feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.75rem 0 0;
+  display: grid;
+  gap: 0.65rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.bc-auth-feature-list li::before {
+  content: "•";
+  color: #fbbf24;
+  font-weight: 700;
+  margin-right: 0.6rem;
+}
+
+.bc-reset-card-shell {
+  max-width: 430px;
+  width: 100%;
+}
+
+.bc-pw-hint {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.bc-reset-form-shell {
+  max-width: 460px;
+}
+
+.bc-reset-form-shell .form-label {
+  font-size: 0.92rem;
+}
+
+.bc-reset-form-shell p,
+.bc-reset-form-shell span,
+.bc-reset-form-shell .alert {
+  font-size: 0.94rem;
+}
+
+.bc-pw-field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.bc-pw-input {
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+  padding-right: 4.25rem;
+  font-size: 0.95rem;
+}
+
+.bc-pw-action-btn {
+  position: absolute;
+  right: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 0;
+  padding: 0.25rem 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #4f46e5;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.bc-pw-action-btn:hover,
+.bc-pw-action-btn:focus {
+  color: #3730a3;
+  outline: none;
+}
+
+/*Register Page */
+
+@media (min-width: 992px) {
+ 
+  .bc-register-layout {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  
+  .bc-register-sidebar-fixed {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  
+  .bc-register-right-scroll {
+    height: 100vh;
+    overflow-y: auto;
+  }
+}
+
+
+.bc-register-right-scroll .bc-register-form-shell {
+  padding-top: 0.5rem;
+  padding-bottom: 1.5rem;
+}
