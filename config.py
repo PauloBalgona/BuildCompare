@@ -22,6 +22,7 @@ def _normalize_database_url(url: str | None) -> str:
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
+    ADMIN_SETUP_KEY = os.getenv("ADMIN_SETUP_KEY", "")
     SQLALCHEMY_DATABASE_URI = _normalize_database_url(os.getenv("DATABASE_URL"))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

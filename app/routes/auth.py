@@ -478,7 +478,7 @@ def register():
 def register_admin():
     if request.method == "POST":
         setup_key = request.form.get("setup_key", "").strip()
-        expected_key = os.environ.get("ADMIN_SETUP_KEY", "")
+        expected_key = os.environ.get("ADMIN_SETUP_KEY", "").strip()
         client_ip = _get_client_ip()
 
         if not expected_key or setup_key != expected_key:
@@ -486,23 +486,30 @@ def register_admin():
             flash("Invalid or unauthorized setup key.", "danger")
             return render_template("auth/register_admin.html"), 403
 
+        full_name = request.form.get("full_name", "").strip()
         first_name = request.form.get("first_name", "").strip()
         last_name = request.form.get("last_name", "").strip()
+
+        if full_name and not (first_name and last_name):
+            parts = full_name.split(None, 1)
+            first_name = parts[0]
+            last_name = parts[1] if len(parts) > 1 else ""
+
         email = request.form.get("email", "").strip().lower()
         phone = request.form.get("phone", "").strip()
         password = request.form.get("password", "")
         confirm_password = request.form.get("confirm_password", "")
 
-        if not all([first_name, last_name, email, password, confirm_password]):
+        if not all([first_name, last_name, email, password]):
             flash("Please fill in all required fields.", "danger")
+            return render_template("auth/register_admin.html"), 400
+
+        if confirm_password and password != confirm_password:
+            flash("Passwords do not match.", "danger")
             return render_template("auth/register_admin.html"), 400
 
         if not _is_valid_gmail(email):
             flash("Admin email must be a valid @gmail.com address.", "danger")
-            return render_template("auth/register_admin.html"), 400
-
-        if password != confirm_password:
-            flash("Passwords do not match.", "danger")
             return render_template("auth/register_admin.html"), 400
 
         password_error = _validate_strong_password(password)
