@@ -41,6 +41,10 @@ class User(UserMixin, db.Model):
     store_name = db.Column(db.String(180), nullable=True)
     store_location = db.Column(db.String(220), nullable=True)
     business_permit_url = db.Column(db.String(500), nullable=True)
+    permit_file_hash = db.Column(db.String(64), nullable=True, index=True)
+    verification_method = db.Column(db.String(20), nullable=True)  # e.g., "auto_ai" or "manual_admin"
+    verification_notes = db.Column(db.Text, nullable=True)
+    verified_at = db.Column(db.DateTime, nullable=True)
 
     # Para sa staff o delivery na nasa ilalim ng owner
     owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True, index=True)
